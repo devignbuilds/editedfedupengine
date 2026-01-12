@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { ArrowLeft, Calendar, DollarSign, Users as TeamIcon, FileText } from 'lucide-react';
+import Milestones from '../components/Milestones';
 
 const ProjectDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -109,8 +110,34 @@ const ProjectDetails = () => {
               </CardContent>
             </Card>
 
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
-              <TaskList projectId={project._id} team={project.employees} />
+            <Milestones project={project} />
+
+            {/* Tasks Section */}
+            <div className="space-y-6">
+               <div className="flex items-center justify-between">
+                 <h3 className="text-xl font-black uppercase tracking-tighter">Tasks</h3>
+                 {/* Toggle could go here */}
+               </div>
+               
+               {/* Note: In a real app we'd fetch tasks here and pass to TaskBoard. 
+                   For MVP, assuming TaskList handles fetching or we lift state.
+                   Current TaskList fetches its own tasks. TaskBoard expects tasks prop.
+                   Let's update TaskList to be 'TasksContainer' or similar, 
+                   but for now we will just use the new TaskBoard if we can fetch tasks, 
+                   or stick to TaskList for details and use TaskBoard for the main page.
+                   
+                   Actually, let's keep TaskList in ProjectDetails for list view (easier for details)
+                   and use TaskBoard for the dedicated /tasks page.
+                   
+                   WAIT: The user asked for "Task Board/List".
+                   Let's leave TaskList here as is for now, but update it to look better (it was already updated in previous turn implicitly or I should assume it's fine for now).
+                   Actually, let's just make sure TaskList looks good. It has a list view.
+                   
+                   I will NOT replace TaskList here yet. I'll create the separate /tasks page first.
+               */}
+               <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+                  <TaskList projectId={project._id} team={project.employees} />
+               </div>
             </div>
           </div>
 

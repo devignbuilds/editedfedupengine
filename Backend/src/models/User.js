@@ -22,7 +22,7 @@ const userSchema = new mongoose.Schema({
   },
   organizationId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Organization', // Future-proofing
+    ref: 'Organization',
     default: null 
   },
   avatar: {
@@ -33,6 +33,17 @@ const userSchema = new mongoose.Schema({
     theme: { type: String, default: 'system' },
     notifications: { type: Boolean, default: true },
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
+  lastLogin: {
+    type: Date,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -42,7 +53,7 @@ const userSchema = new mongoose.Schema({
 // Encrypt password using bcrypt
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {
-    next();
+    return next();
   }
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

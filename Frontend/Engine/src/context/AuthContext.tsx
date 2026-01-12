@@ -3,7 +3,7 @@ import type { User } from '../types/user';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; message?: string }>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<{ success: boolean; message?: string }>;
   register: (name: string, email: string, password: string, role?: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   loading: boolean;
@@ -24,14 +24,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user');
+    // Check both storages
+    const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
     if (storedUser) {
       setUser(JSON.parse(storedUser));
     }
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe: boolean = true) => {
     try {
       const response = await fetch('http://localhost:5000/api/auth/login', {
         method: 'POST',
@@ -45,7 +46,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (response.ok) {
         setUser(data);
-        localStorage.setItem('user', JSON.stringify(data));
+        if (rememberMe) {
+            localStorage.setItem('user', JSON.stringify(data));
+        } else {
+            sessionStorage.setItem('user', JSON.stringify(data));
+        }
         return { success: true };
       } else {
         return { success: false, message: data.message };
@@ -82,6 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
   };
 
   return (

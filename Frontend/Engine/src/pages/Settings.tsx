@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import DashboardLayout from '../components/layout/DashboardLayout';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { User, Lock, Save, Camera } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useAuth } from '../context/AuthContext';

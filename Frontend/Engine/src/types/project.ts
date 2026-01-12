@@ -10,5 +10,11 @@ export interface Project {
   deadline?: string;
   budget?: number;
   tags?: string[];
+  milestones?: {
+    _id: string;
+    title: string;
+    status: 'pending' | 'in-progress' | 'completed';
+    dueDate?: string;
+  }[];
   createdAt: string;
 }

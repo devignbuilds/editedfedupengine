@@ -11,28 +11,37 @@ const TeamDashboard = () => {
   const { user } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [myTasks, setMyTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [projectsRes, usersRes] = await Promise.all([
+        const [projectsRes, usersRes, tasksRes] = await Promise.all([
           fetch('http://localhost:5000/api/projects', {
             headers: { Authorization: `Bearer ${user?.token}` },
           }),
           fetch('http://localhost:5000/api/users', {
+            headers: { Authorization: `Bearer ${user?.token}` },
+          }),
+          fetch('http://localhost:5000/api/tasks', { // Assuming this returns all accessible tasks
             headers: { Authorization: `Bearer ${user?.token}` },
           })
         ]);
 
         const projectsData = await projectsRes.json();
         const usersData = await usersRes.json();
+        const tasksData = tasksRes.ok ? await tasksRes.json() : [];
 
         if (projectsRes.ok) setProjects(projectsData);
         if (usersRes.ok) {
-          // Filter to show only employees
           const employees = usersData.filter((u: any) => u.role === 'employee');
           setTeamMembers(employees);
+        }
+        if (tasksRes.ok) {
+           // Filter for 'my tasks' if the API returns more
+           const myTasksData = tasksData.filter((t: any) => t.assignedTo?._id === user?._id || t.assignedTo === user?._id);
+           setMyTasks(myTasksData);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -53,6 +62,46 @@ const TeamDashboard = () => {
       <div className="mb-12">
         <h1 className="text-4xl font-black tracking-tighter uppercase italic">Team Dashboard</h1>
         <p className="text-muted-foreground mt-1">Manage your team members and collaborative projects.</p>
+      </div>
+
+      {/* My Tasks Section */}
+      <div className="mb-12">
+         <div className="flex items-center space-x-3 mb-6">
+           <div className="h-6 w-6 rounded-full bg-primary/20 flex items-center justify-center">
+             <Briefcase className="h-3 w-3 text-primary" />
+           </div>
+           <h2 className="text-2xl font-black uppercase tracking-tight">My Tasks</h2>
+           <span className="px-3 py-1 bg-muted rounded-full text-xs font-black">{myTasks.length}</span>
+           <Link to="/tasks" className="ml-auto text-xs font-bold uppercase tracking-widest text-primary hover:underline">View Board</Link>
+         </div>
+         
+         {myTasks.length > 0 ? (
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+             {myTasks.slice(0, 4).map((task) => (
+               <div key={task._id} className="p-4 rounded-xl border border-border bg-card hover:border-foreground/50 transition-colors">
+                  <div className="flex justify-between items-start mb-2">
+                     <span className={`px-2 py-0.5 rounded-full text-[10px] uppercase font-black tracking-wider ${
+                        task.priority === 'critical' ? 'bg-destructive/10 text-destructive' : 'bg-muted text-muted-foreground'
+                     }`}>
+                       {task.priority || 'medium'}
+                     </span>
+                     <span className="text-[10px] text-muted-foreground font-bold uppercase">{task.status}</span>
+                  </div>
+                  <h4 className="font-bold text-sm mb-1 truncate">{task.title}</h4>
+                  <p className="text-xs text-muted-foreground truncate opacity-70 mb-3">{task.description || 'No description'}</p>
+                  {task.dueDate && (
+                    <div className="text-[10px] font-medium text-muted-foreground bg-muted/30 px-2 py-1 rounded w-fit">
+                      Due: {new Date(task.dueDate).toLocaleDateString()}
+                    </div>
+                  )}
+               </div>
+             ))}
+           </div>
+         ) : (
+           <div className="p-8 border-2 border-dashed border-border rounded-2xl text-center">
+             <p className="text-muted-foreground font-medium italic">No active tasks assigned to you.</p>
+           </div>
+         )}
       </div>
 
       {/* Team Members Section */}

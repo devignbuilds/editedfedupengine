@@ -109,19 +109,20 @@ const ChatWindow = ({ projectId }: ChatWindowProps) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSendMessage} className="p-4 bg-muted border-t border-border flex gap-2">
+      <form onSubmit={handleSendMessage} className="p-4 bg-background/50 backdrop-blur-sm border-t border-border flex gap-2">
         <input
           type="text"
           placeholder="Type a message..."
-          className="flex-1 bg-input border border-input rounded px-4 py-2 text-foreground focus:ring-1 focus:ring-ring outline-none"
+          className="flex-1 bg-muted/50 border border-border rounded-full px-4 py-2 text-sm text-foreground focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-muted-foreground/50"
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
         />
         <button
           type="submit"
-          className="bg-primary px-4 py-2 rounded text-primary-foreground hover:opacity-90 font-bold"
+          disabled={!newMessage.trim()}
+          className="bg-primary h-10 w-10 rounded-full text-primary-foreground hover:opacity-90 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-sm"
         >
-          Send
+          <svg className="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" /></svg>
         </button>
       </form>
     </div>

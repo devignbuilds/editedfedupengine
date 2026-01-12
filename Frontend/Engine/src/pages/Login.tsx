@@ -1,10 +1,16 @@
 import { useState, type FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '../components/ui/card';
+import { Loader2 } from 'lucide-react';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
@@ -12,60 +18,84 @@ const Login = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
-    const result = await login(email, password);
-    if (result.success) {
-      // Simple role-based redirect (in a real app, this might be better in the AuthContext or a protected route wrapper)
-      // For now, we'll just redirect to dashboard, but let's assume the user object is available in context immediately or we check the response
-      // The login function returns success but doesn't return the user object directly here, but it sets it in context.
-      // We can't easily access the updated user context here immediately due to closure.
-      // So we'll redirect to /dashboard and let Dashboard.tsx handle the redirection or just redirect to /client-dashboard if we know.
-      // Actually, let's just redirect to /dashboard and have a smart Dashboard component.
-      navigate('/dashboard');
-    } else {
-      setError(result.message || 'Login failed');
+    setIsLoading(true);
+    try {
+      const result = await login(email, password, rememberMe);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.message || 'Login failed');
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background text-foreground">
-      <div className="w-full max-w-md p-8 space-y-6 bg-card border border-border rounded-lg shadow-sm">
-        <h2 className="text-2xl font-bold text-center text-foreground">Login</h2>
-        {error && <p className="text-destructive text-center text-sm">{error}</p>}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground">Email</label>
-            <input
-              type="email"
-              className="w-full px-4 py-2 mt-1 bg-input border border-input rounded focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-muted-foreground">Password</label>
-            <input
-              type="password"
-              className="w-full px-4 py-2 mt-1 bg-input border border-input rounded focus:outline-none focus:ring-2 focus:ring-ring text-foreground"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full px-4 py-2 font-bold text-primary-foreground bg-primary rounded hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            Login
-          </button>
-        </form>
-        <p className="text-center text-muted-foreground">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-foreground hover:underline underline-offset-4">
-            Register
-          </Link>
-        </p>
-      </div>
+    <div className="flex items-center justify-center min-h-screen bg-background text-foreground px-4 font-sans">
+      <Card className="w-full max-w-sm border-border shadow-sm">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-xl font-bold tracking-tight text-center">Engine Access</CardTitle>
+          <CardDescription className="text-center font-medium">
+            Enter your credentials to enter the workspace.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-xs font-bold text-center">{error}</div>}
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Email</label>
+              <Input
+                type="email"
+                placeholder="name@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="font-medium"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Password</label>
+                <Link to="/forgot-password" className="text-xs text-primary hover:underline font-medium">Forgot password?</Link>
+              </div>
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="font-medium"
+              />
+            </div>
+            
+            <div className="flex items-center space-x-2">
+                <input 
+                    type="checkbox" 
+                    id="remember" 
+                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <label htmlFor="remember" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 select-none cursor-pointer">
+                    Remember me
+                </label>
+            </div>
+
+            <Button className="w-full font-black uppercase tracking-widest" type="submit" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Sign In
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="justify-center border-t border-border mt-4 pt-6">
+          <p className="text-sm text-muted-foreground">
+            No account?{' '}
+            <Link to="/register" className="text-foreground font-bold hover:underline underline-offset-4">
+              Initialize Workspace
+            </Link>
+          </p>
+        </CardFooter>
+      </Card>
     </div>
   );
 };
