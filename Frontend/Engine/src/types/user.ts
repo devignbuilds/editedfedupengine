@@ -9,4 +9,5 @@ export interface User {
     notifications: boolean;
   };
   token?: string;
+  modules?: string[];
 }

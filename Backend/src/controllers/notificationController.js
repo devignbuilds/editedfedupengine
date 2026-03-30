@@ -1,11 +1,12 @@
-import Notification from '../models/Notification.js';
+import Notification from "../models/Notification.js";
 
 // @desc    Get user notifications
 // @route   GET /api/notifications
 // @access  Private
 const getNotifications = async (req, res) => {
-  const notifications = await Notification.find({ recipient: req.user._id })
-    .sort({ createdAt: -1 });
+  const notifications = await Notification.find({
+    recipient: req.user._id,
+  }).sort({ createdAt: -1 });
   res.json(notifications);
 };
 
@@ -17,7 +18,7 @@ const markAsRead = async (req, res) => {
 
   if (notification) {
     if (notification.recipient.toString() !== req.user._id.toString()) {
-      res.status(401).json({ message: 'Not authorized' });
+      res.status(401).json({ message: "Not authorized" });
       return;
     }
 
@@ -25,21 +26,28 @@ const markAsRead = async (req, res) => {
     await notification.save();
     res.json(notification);
   } else {
-    res.status(404).json({ message: 'Notification not found' });
+    res.status(404).json({ message: "Notification not found" });
   }
 };
 
 // @desc    Create notification (Internal use)
-const createNotification = async (recipientId, message, type = 'info', link = null) => {
+const createNotification = async (
+  recipientId,
+  message,
+  type = "info",
+  link = null,
+) => {
   try {
-    await Notification.create({
+    const notification = await Notification.create({
       recipient: recipientId,
       message,
       type,
       link,
     });
+    return notification;
   } catch (error) {
-    console.error('Error creating notification:', error);
+    console.error("Error creating notification:", error);
+    return null;
   }
 };
 

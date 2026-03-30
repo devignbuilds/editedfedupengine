@@ -1,0 +1,13 @@
+{
+  "name": "enginev1",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "concurrently \"npm --prefix Backend run dev\" \"npm --prefix Frontend/Engine run dev -- --host\"",
+    "dev:backend": "npm --prefix Backend run dev",
+    "dev:frontend": "npm --prefix Frontend/Engine run dev -- --host"
+  },
+  "devDependencies": {
+    "concurrently": "^8.0.0"
+  }
+}

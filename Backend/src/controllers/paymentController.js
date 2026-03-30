@@ -1,6 +1,6 @@
-import Invoice from '../models/Invoice.js';
-import Project from '../models/Project.js';
-import { createNotification } from './notificationController.js';
+import Invoice from "../models/Invoice.js";
+import Project from "../models/Project.js";
+import { createNotification } from "./notificationController.js";
 
 // @desc    Create a new invoice
 // @route   POST /api/payments/invoices
@@ -10,7 +10,7 @@ const createInvoice = async (req, res) => {
 
   const project = await Project.findById(projectId);
   if (!project) {
-    res.status(404).json({ message: 'Project not found' });
+    res.status(404).json({ message: "Project not found" });
     return;
   }
 
@@ -22,15 +22,21 @@ const createInvoice = async (req, res) => {
   });
 
   if (invoice) {
-    await createNotification(
+    const notification = await createNotification(
       project.client,
       `New invoice created for project ${project.name}: $${amount}`,
-      'payment',
-      '/client-dashboard'
+      "payment",
+      "/invoices",
     );
+
+    const io = req.app.get("io");
+    if (io && notification) {
+      io.emit("notification", notification);
+    }
+
     res.status(201).json(invoice);
   } else {
-    res.status(400).json({ message: 'Invalid invoice data' });
+    res.status(400).json({ message: "Invalid invoice data" });
   }
 };
 
@@ -40,13 +46,15 @@ const createInvoice = async (req, res) => {
 const getInvoices = async (req, res) => {
   let invoices;
 
-  if (req.user.role === 'admin') {
+  if (req.user.role === "admin") {
     invoices = await Invoice.find({})
-      .populate('client', 'name email')
-      .populate('project', 'name');
+      .populate("client", "name email")
+      .populate("project", "name");
   } else {
-    invoices = await Invoice.find({ client: req.user._id })
-      .populate('project', 'name');
+    invoices = await Invoice.find({ client: req.user._id }).populate(
+      "project",
+      "name",
+    );
   }
 
   res.json(invoices);
@@ -60,24 +68,24 @@ const payInvoice = async (req, res) => {
 
   if (invoice) {
     if (invoice.client.toString() !== req.user._id.toString()) {
-      res.status(401).json({ message: 'Not authorized' });
+      res.status(401).json({ message: "Not authorized" });
       return;
     }
 
-    invoice.status = 'paid';
+    invoice.status = "paid";
     const updatedInvoice = await invoice.save();
-    
+
     // Notify admin (assuming first admin found for now, or all admins)
     // For UVP, we'll notify the system/admin
     await createNotification(
       null, // This would normally go to admins. For now, let's just create it.
       `Payment received for project ${invoice._id}: $${invoice.amount}`,
-      'payment'
+      "payment",
     );
 
     res.json(updatedInvoice);
   } else {
-    res.status(404).json({ message: 'Invoice not found' });
+    res.status(404).json({ message: "Invoice not found" });
   }
 };
 

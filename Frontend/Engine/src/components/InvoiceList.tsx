@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
-import type { Invoice } from '../types/invoice';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from './ui/button';
-import { Badge } from './ui/badge';
-import { FileText, Loader2, CreditCard } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useAuth } from "../context/useAuth";
+import type { Invoice } from "../types/invoice";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "./ui/button";
+import { Badge } from "./ui/badge";
+import { FileText, Loader2, CreditCard } from "lucide-react";
 
 const InvoiceList = () => {
   const { user } = useAuth();
@@ -18,17 +18,20 @@ const InvoiceList = () => {
 
   const fetchInvoices = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/payments/invoices', {
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
-      });
+      const response = await fetch(
+        "http://localhost:5001/api/payments/invoices",
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        }
+      );
       const data = await response.json();
       if (response.ok) {
         setInvoices(data);
       }
     } catch (error) {
-      console.error('Error fetching invoices:', error);
+      console.error("Error fetching invoices:", error);
     } finally {
       setLoading(false);
     }
@@ -37,30 +40,38 @@ const InvoiceList = () => {
   const handlePay = async (invoiceId: string) => {
     setProcessing(invoiceId);
     try {
-      const response = await fetch(`http://localhost:5000/api/payments/invoices/${invoiceId}/pay`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${user?.token}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:5001/api/payments/invoices/${invoiceId}/pay`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         fetchInvoices();
       }
     } catch (error) {
-      console.error('Error paying invoice:', error);
+      console.error("Error paying invoice:", error);
     } finally {
       setProcessing(null);
     }
   };
 
-  if (loading) return <div className="flex justify-center p-4"><Loader2 className="h-6 w-6 animate-spin text-muted-foreground" /></div>;
+  if (loading)
+    return (
+      <div className="flex justify-center p-4">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
 
   return (
     <div className="space-y-4">
       <AnimatePresence>
         {invoices.map((invoice, index) => (
-          <motion.div 
+          <motion.div
             key={invoice._id}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -72,19 +83,26 @@ const InvoiceList = () => {
                 <FileText className="h-5 w-5 text-muted-foreground" />
               </div>
               <div>
-                <h4 className="font-bold text-sm tracking-tight">{invoice.project.name}</h4>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest font-medium">Due: {new Date(invoice.dueDate).toLocaleDateString()}</p>
+                <h4 className="font-bold text-sm tracking-tight">
+                  {invoice.project.name}
+                </h4>
+                <p className="text-xs text-muted-foreground uppercase tracking-widest font-medium">
+                  Due: {new Date(invoice.dueDate).toLocaleDateString()}
+                </p>
               </div>
             </div>
 
             <div className="flex items-center gap-6">
               <span className="font-black text-lg tabular-nums tracking-tight">
-                {new Intl.NumberFormat('en-US', { style: 'currency', currency: invoice.currency || 'USD' }).format(invoice.amount)}
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: invoice.currency || "USD",
+                }).format(invoice.amount)}
               </span>
-              
-              {invoice.status === 'pending' ? (
-                <Button 
-                  size="sm" 
+
+              {invoice.status === "pending" ? (
+                <Button
+                  size="sm"
                   onClick={() => handlePay(invoice._id)}
                   disabled={!!processing}
                   className="rounded-full px-6 font-bold uppercase tracking-widest text-[10px]"
@@ -94,10 +112,13 @@ const InvoiceList = () => {
                   ) : (
                     <CreditCard className="h-3 w-3 mr-2" />
                   )}
-                  {processing === invoice._id ? 'Processing' : 'Pay Now'}
+                  {processing === invoice._id ? "Processing" : "Pay Now"}
                 </Button>
               ) : (
-                <Badge variant={invoice.status === 'paid' ? 'secondary' : 'outline'} className="uppercase tracking-widest text-[10px]">
+                <Badge
+                  variant={invoice.status === "paid" ? "secondary" : "outline"}
+                  className="uppercase tracking-widest text-[10px]"
+                >
                   {invoice.status}
                 </Badge>
               )}
@@ -106,7 +127,9 @@ const InvoiceList = () => {
         ))}
         {invoices.length === 0 && (
           <div className="text-center py-12 border-2 border-dashed border-border rounded-xl">
-             <p className="text-muted-foreground italic text-sm">No invoices found on record.</p>
+            <p className="text-muted-foreground italic text-sm">
+              No invoices found on record.
+            </p>
           </div>
         )}
       </AnimatePresence>

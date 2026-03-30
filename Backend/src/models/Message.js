@@ -4,7 +4,11 @@ const messageSchema = new mongoose.Schema({
   project: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project',
-    required: true,
+    required: false,
+  },
+  isGeneral: {
+    type: Boolean,
+    default: false,
   },
   sender: {
     type: mongoose.Schema.Types.ObjectId,

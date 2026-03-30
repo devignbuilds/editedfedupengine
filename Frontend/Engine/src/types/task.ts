@@ -5,7 +5,7 @@ export interface Task {
   _id: string;
   title: string;
   description?: string;
-  project: Project;
+  project: Project | string;
   assignedTo?: User;
   status: 'todo' | 'in-progress' | 'review' | 'done';
   priority?: 'low' | 'medium' | 'high' | 'critical';

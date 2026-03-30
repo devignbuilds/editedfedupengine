@@ -1,22 +1,21 @@
-import express from 'express';
+import express from "express";
 import {
   createProject,
   getProjects,
   getProjectById,
   updateProject,
   deleteProject,
-} from '../controllers/projectController.js';
-import { protect, admin } from '../middleware/authMiddleware.js';
+} from "../controllers/projectController.js";
+import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.route('/')
-  .post(protect, createProject)
-  .get(protect, getProjects);
+router.route("/").post(protect, createProject).get(protect, getProjects);
 
-router.route('/:id')
+router
+  .route("/:id")
   .get(protect, getProjectById)
-  .put(protect, admin, updateProject)
+  .put(protect, updateProject)
   .delete(protect, admin, deleteProject);
 
 export default router;

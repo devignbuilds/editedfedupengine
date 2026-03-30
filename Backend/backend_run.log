@@ -1,0 +1,19 @@
+﻿[dotenv@17.2.3] injecting env (7) from .env -- tip: ≡ƒùé∩╕Å backup and recover secrets: https://dotenvx.com/ops
+node : Port 5001 is in use, 
+trying port 5002...
+At line:1 char:1
++ node src/server.js 2>&1 | 
+Out-File -FilePath 
+backend_run.log -Encodin ...
++ ~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          :  
+   NotSpecified: (Port 5001 i  
+  s in use, trying port 5002   
+ ...:String) [], RemoteExce    
+ption
+    + FullyQualifiedErrorId :  
+   NativeCommandError
+ 
+Engine v1 Backend running on port 5001
+Engine v1 Backend running on port 5002
+MongoDB connected: localhost

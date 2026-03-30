@@ -1,0 +1,15 @@
+﻿[dotenv@17.2.3] injecting env (7) from .env -- tip: ΓÜÖ∩╕Å  load multiple .env files with { path: ['.env.local', '.env'] }
+Engine v1 Backend running on port 5001
+MongoDB connected: localhost
+User connected: UhzRW2X0ObtTcreqAAAE
+User connected: efenjF4NPe_BXku4AAAF
+User disconnected: UhzRW2X0ObtTcreqAAAE
+User connected: D7cbXy-CaD-_24ptAAAH
+User D7cbXy-CaD-_24ptAAAH joined project 69663cbebfc81316dd96f2de
+User D7cbXy-CaD-_24ptAAAH joined project 69663cbebfc81316dd96f2de
+User disconnected: efenjF4NPe_BXku4AAAF
+User D7cbXy-CaD-_24ptAAAH joined project 69663cbebfc81316dd96f2de
+User D7cbXy-CaD-_24ptAAAH joined project 69663cbebfc81316dd96f2de
+User D7cbXy-CaD-_24ptAAAH joined project 69663cbebfc81316dd96f2de
+User D7cbXy-CaD-_24ptAAAH joined project 69663cbebfc81316dd96f2de
+User disconnected: D7cbXy-CaD-_24ptAAAH

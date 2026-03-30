@@ -1,0 +1,52 @@
+﻿[dotenv@17.2.3] injecting env (7) from .env -- tip: ≡ƒöÉ prevent building .env in docker: https://dotenvx.com/prebuild
+node : Port 5001 is in use, 
+trying port 5002...
+At line:1 char:1
++ node src/server.js 2>&1 | 
+Out-File -FilePath 
+error_v3.log -Encoding u ...
++ ~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          :  
+   NotSpecified: (Port 5001 i  
+  s in use, trying port 5002   
+ ...:String) [], RemoteExce    
+ption
+    + FullyQualifiedErrorId :  
+   NativeCommandError
+ 
+Port 5001 is in use, trying 
+port 5002...
+Port 5002 is in use, trying 
+port 5003...
+Port 5001 is in use, trying 
+port 5002...
+node:net:2044
+    throw new 
+ERR_SERVER_ALREADY_LISTEN();
+    ^
+
+Error 
+[ERR_SERVER_ALREADY_LISTEN]: 
+Listen method has been called 
+more than once without closing.
+    at Server.listen 
+(node:net:2044:11)
+    at tryListen (file:///C:/Us
+ers/sl2yz/Workspace/Enginev1/Ba
+ckend/src/server.js:34:6)
+    at Server.<anonymous> (file
+:///C:/Users/sl2yz/Workspace/En
+ginev1/Backend/src/server.js:41
+:11)
+    at Server.emit 
+(node:events:531:35)
+    at emitErrorNT 
+(node:net:1976:8)
+    at process.processTicksAndR
+ejections (node:internal/proces
+s/task_queues:90:21) {
+  code: 
+'ERR_SERVER_ALREADY_LISTEN'
+}
+
+Node.js v22.20.0

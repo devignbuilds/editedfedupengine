@@ -7,9 +7,12 @@ export const getUsers = async (req, res) => {
   try {
     const keyword = req.query.role ? { role: req.query.role } : {};
     // Only fetch non-deleted users by default, unless ?deleted=true
-    const deletedFilter = req.query.deleted === 'true' ? {} : { isDeleted: false };
-    
-    const users = await User.find({ ...keyword, ...deletedFilter }).select("-password");
+    const deletedFilter =
+      req.query.deleted === "true" ? {} : { isDeleted: false };
+
+    const users = await User.find({ ...keyword, ...deletedFilter }).select(
+      "-password"
+    );
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -25,7 +28,7 @@ export const getUserById = async (req, res) => {
     if (user) {
       res.json(user);
     } else {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -40,22 +43,34 @@ export const updateUser = async (req, res) => {
     const user = await User.findById(req.params.id);
 
     if (user) {
+      // If the request attempts to remove admin privileges or delete the user,
+      // only allow removing the last admin if the requester is Amine@engine.com
+      const willRemoveAdmin =
+        (req.body.role && req.body.role !== "admin") || req.body.isDeleted;
+      if (willRemoveAdmin) {
+        // If the requester is NOT Amine, prevent removing/downgrading the last admin
+        if (
+          !req.user ||
+          (req.user.email || "").toLowerCase() !== "amine@engine.com"
+        ) {
+          const otherAdmins = await User.countDocuments({
+            role: "admin",
+            isDeleted: false,
+            _id: { $ne: user._id },
+          });
+          if (otherAdmins === 0) {
+            return res
+              .status(400)
+              .json({ message: "Cannot remove or delete the last admin" });
+          }
+        }
+      }
+
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
       user.role = req.body.role || user.role;
-      user.isDeleted = req.body.isDeleted !== undefined ? req.body.isDeleted : user.isDeleted;
-
-      // Prevent disabling the last admin if this update changes role or deletes them
-      if (user.role !== 'admin' || user.isDeleted) {
-         const adminCount = await User.countDocuments({ role: 'admin', isDeleted: false });
-         // If we are modifying the user who IS an admin, count includes them as admin still in DB
-         // We need to check if there is ANOTHER admin
-         const otherAdmins = await User.findOne({ role: 'admin', isDeleted: false, _id: { $ne: user._id } });
-         if (!otherAdmins && (req.body.role !== 'admin' || req.body.isDeleted)) {
-             res.status(400);
-             throw new Error('Cannot remove or delete the last admin');
-         }
-      }
+      user.isDeleted =
+        req.body.isDeleted !== undefined ? req.body.isDeleted : user.isDeleted;
 
       const updatedUser = await user.save();
 
@@ -64,13 +79,13 @@ export const updateUser = async (req, res) => {
         name: updatedUser.name,
         email: updatedUser.email,
         role: updatedUser.role,
-        isDeleted: updatedUser.isDeleted
+        isDeleted: updatedUser.isDeleted,
       });
     } else {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
-     res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -82,23 +97,25 @@ export const deleteUser = async (req, res) => {
     const user = await User.findById(req.params.id);
 
     if (user) {
-      // Check if trying to delete last admin
-      if (user.role === 'admin') {
-        const otherAdmins = await User.findOne({ role: 'admin', isDeleted: false, _id: { $ne: user._id } });
-        if (!otherAdmins) {
-            res.status(400).json({ message: 'Cannot delete the last admin user' });
-            return;
-        }
+      // Allow deleting admin users ONLY if the requester is Amine@engine.com
+      if (
+        user.role === "admin" &&
+        (req.user || {}).email?.toLowerCase() !== "amine@engine.com"
+      ) {
+        res
+          .status(403)
+          .json({ message: "Only Amine@engine.com can delete admin users" });
+        return;
       }
 
       // Soft delete
       user.isDeleted = true;
       await user.save();
-      res.json({ message: 'User deactivated (soft deleted)' });
+      res.json({ message: "User deactivated (soft deleted)" });
     } else {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: "User not found" });
     }
   } catch (error) {
-     res.status(500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
